@@ -60,6 +60,13 @@ abstract class Netzarbeiter_GroupsCatalog2_Model_Resource_Indexer_Abstract exten
     protected $_groupIds = array();
 
     /**
+     * Array of assigned category products
+     *
+     * @var array $_categoryProducts
+     */
+    protected $_categoryProducts = array();
+
+    /**
      * Module helper instance
      *
      * @var Netzarbeiter_GroupsCatalog2_Helper_Data
@@ -325,6 +332,8 @@ abstract class Netzarbeiter_GroupsCatalog2_Model_Resource_Indexer_Abstract exten
                         $data, $entityId, $entityDefaultGroupsWithoutMode, $storesHandled, $limitToGroupIds
                     );
 
+                    $this->_applyFilterToData($data);
+
                     // Insert INSERT_CHUNK_SIZE records at a time.
                     // If INSERT_CHUNK_SIZE records exist in $data then it is reset to an empty array afterwards
                     $this->_insertIndexRecordsIfMinChunkSizeReached($data, self::INSERT_CHUNK_SIZE);
@@ -365,11 +374,22 @@ abstract class Netzarbeiter_GroupsCatalog2_Model_Resource_Indexer_Abstract exten
                 $data, $entityId, $entityDefaultGroupsWithoutMode, $storesHandled, $limitToGroupIds
             );
 
+            $this->_applyFilterToData($data);
             // Insert missing index records
             $this->_insertIndexRecordsIfMinChunkSizeReached($data, 1);
         }
 
         Varien_Profiler::stop($this->_getProfilerName() . '::reindexEntity::insert');
+    }
+
+    /**
+     * Apply a filter
+     *
+     * @param array $data Insert data
+     */
+    protected function _applyFilterToData(array &$data)
+    {
+
     }
 
     /**

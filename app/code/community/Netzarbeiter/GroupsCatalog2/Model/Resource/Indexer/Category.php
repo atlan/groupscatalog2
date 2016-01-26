@@ -68,4 +68,40 @@ class Netzarbeiter_GroupsCatalog2_Model_Resource_Indexer_Category
     {
         return Mage_Catalog_Model_Category::ENTITY;
     }
+
+    /**
+     * Apply a filter
+     *
+     * @param array $data Insert data
+     */
+    protected function _applyFilterToData(array &$data)
+    {
+        if ($this->_helper()->getConfig('show_empty_categories')) return;
+
+        $this->_categoryProducts = array();
+        foreach($data as $key => $values) {
+            $visibleItems = array();
+            if(empty($this->_categoryProducts[$values['catalog_entity_id']])) {
+                $this->_categoryProducts[$values['catalog_entity_id']] = array();
+                $category = Mage::getModel('catalog/category')->load($values['catalog_entity_id']);
+                $productCollection = Mage::getResourceModel('catalog/product_collection')
+                    ->addCategoryFilter($category);
+                foreach($productCollection as $product) {
+                    $this->_categoryProducts[$values['catalog_entity_id']][] = $product->getId();
+                }
+            }
+            if(!empty($this->_categoryProducts[$values['catalog_entity_id']])) {
+                $visibleItems = Mage::getResourceSingleton('netzarbeiter_groupscatalog2/filter')
+                    ->getVisibleIdsFromEntityIdList(
+                        Mage_Catalog_Model_Product::ENTITY,
+                        $this->_categoryProducts[$values['catalog_entity_id']],
+                        $values['store_id'],
+                        $values['group_id']
+                    );
+            }
+            if(empty($visibleItems)) {
+                unset($data[$key]);
+            }
+        }
+    }
 }
